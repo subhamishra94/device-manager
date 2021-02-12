@@ -27,17 +27,6 @@ const CheckInOrOutDevicePopup = ({
   }, [open]);
 
   const handleOnSave = () => {
-    // if (isCheckedOut) {
-    //   checkInOrOutDevice(id, checkoutUser, () => {
-    //     onSaveSuccess();
-    //     onClose();
-    //   });
-    // } else {
-    //   checkInOrOutDevice(id, checkoutUser, () => {
-    //     onSaveSuccess();
-    //     onClose();
-    //   });
-    // }
     checkInOrOutDevice(
       { id, checkoutUser: isCheckedOut ? null : checkoutUser, rating },
       () => {
@@ -49,7 +38,7 @@ const CheckInOrOutDevicePopup = ({
 
   const handleOnChange = (e) => {
     if (isCheckedOut) {
-      if (e.target.value <= 5 && e.target.value > 0) {
+      if (e.target.value <= 5 && e.target.value >= 0) {
         setRating(e.target.value);
       }
     } else {

@@ -4,6 +4,9 @@ const Sequelize = require("sequelize");
 
 route.get("/", async (req, res) => {
   const deviceList = await models.Device.findAll({
+    where: {
+      isDeleted: false
+    },
     attributes: [
       'id',
       'device',
@@ -39,7 +42,11 @@ route.post("/", async (req, res) => {
 route.delete("/:deviceId", async (req, res) => {
   const { deviceId } = req.params;
   try {
-    var deletedDeviceId = await models.Device.destroy({
+    var deletedDeviceId = await models.Device.update(
+      {
+        isDeleted: true
+      },
+    {
       where: {
         id: deviceId,
       },

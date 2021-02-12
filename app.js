@@ -6,6 +6,7 @@ const cors = require('cors');
 const deviceRouter = require('./controllers/device');
 
 // middlewares
+app.use(express.static('./react/build'));
 app.use(express.json());
 app.use(cors());
 app.use(express.urlencoded({ extended: false }));

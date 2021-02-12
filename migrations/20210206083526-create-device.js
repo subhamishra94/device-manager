@@ -29,6 +29,9 @@ module.exports = {
       lastCheckedOutDate: {
         type: Sequelize.DATE
       },
+      isDeleted: {
+        type: Sequelize.BOOLEAN
+      },
       createdAt: {
         allowNull: false,
         type: Sequelize.DATE
