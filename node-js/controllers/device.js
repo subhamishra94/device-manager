@@ -1,37 +1,102 @@
-const route = require('express').Router();
-const models = require('../models');
+const route = require("express").Router();
+const models = require("../models");
+const Sequelize = require("sequelize");
 
-route.get('/', async (req, res) => {
-  const deviceList = await models.Device.findAll();
+route.get("/", async (req, res) => {
+  const deviceList = await models.Device.findAll({
+    attributes: [
+      'id',
+      'device',
+      'os',
+      'manufacturer',
+      'isCheckedOut',
+      'lastCheckedoutBy',
+      'lastCheckedOutDate',
+      [Sequelize.fn("AVG", Sequelize.col("Feedbacks.rating")), "avgRating"],
+    ],
+    include: models.Feedback,
+    group: ['Device.id']
+  });
 
   res.send(deviceList);
 });
 
-route.post('/', async (req, res) => {
+route.post("/", async (req, res) => {
   const { device, os, manufacturer } = req.body;
   try {
-    var insertedDevice = await models.Device.create({ device: device, manufacturer: manufacturer, os: os });
+    var insertedDevice = await models.Device.create({
+      device: device,
+      manufacturer: manufacturer,
+      os: os,
+    });
     res.send(insertedDevice);
   } catch (err) {
     console.log(err);
-    res.send({error: err.message })
+    res.send({ error: err.message });
   }
 });
 
-route.delete('/:id', async (req, res) => {
-  const { id } = req.params;
+route.delete("/:deviceId", async (req, res) => {
+  const { deviceId } = req.params;
   try {
-    var insertedDevice = await models.Device.destroy({
+    var deletedDeviceId = await models.Device.destroy({
       where: {
-        id: id
-      }
+        id: deviceId,
+      },
     });
-    res.send("successfully deleted");
+    res.send("successfully deleted device with id " + deletedDeviceId);
   } catch (err) {
     console.log(err);
-    res.send({error: err.message })
+    res.send({ error: err.message });
   }
 });
 
+route.post("/check-in-out", async (req, res) => {
+  const { checkoutBy, deviceId, rating } = req.body;
+  try {
+    if (checkoutBy) {
+      var updateDevice = await models.Device.update(
+        {
+          lastCheckedoutBy: checkoutBy,
+          isCheckedOut: true,
+          lastCheckedOutDate: new Date(),
+        },
+        {
+          where: {
+            id: deviceId,
+          },
+        }
+      );
+      res.send({ isSuccess: updateDevice });
+    } else {
+      var updateDevice = await models.Device.update(
+        {
+          isCheckedOut: false,
+        },
+        {
+          where: {
+            id: deviceId,
+          },
+        }
+      );
+      const device = await models.Device.findOne({
+        where: {
+          id: deviceId,
+        },
+      });
 
-module.exports = route
+      await models.Feedback.create({
+        deviceId,
+        checkedUser: device.lastCheckedoutBy,
+        rating,
+      });
+
+      res.send({ isSuccess: updateDevice });
+    }
+  } catch (err) {
+    console.log(err);
+    res.send({ error: err.message });
+  }
+});
+
+module.exports = route;

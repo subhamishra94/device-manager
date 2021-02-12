@@ -1,33 +1,25 @@
 'use strict';
 module.exports = {
   up: async (queryInterface, Sequelize) => {
-    await queryInterface.createTable('Devices', {
+    await queryInterface.createTable('Feedbacks', {
       id: {
         allowNull: false,
         autoIncrement: true,
         primaryKey: true,
         type: Sequelize.INTEGER
       },
-      device: {
+      deviceId: {
         allowNull: false,
-        type: Sequelize.STRING,
+        foreignKey: true,
+        type: Sequelize.INTEGER,
+        references: { model: 'Devices', key: 'id' },
       },
-      os: {
-        allowNull: false,
+      checkedUser: {
         type: Sequelize.STRING
       },
-      manufacturer: {
+      rating: {
         allowNull: false,
-        type: Sequelize.STRING
-      },
-      isCheckedOut: {
-        type: Sequelize.BOOLEAN
-      },
-      lastCheckedoutBy: {
-        type: Sequelize.STRING
-      },
-      lastCheckedOutDate: {
-        type: Sequelize.DATE
+        type: Sequelize.INTEGER
       },
       createdAt: {
         allowNull: false,
@@ -40,6 +32,6 @@ module.exports = {
     });
   },
   down: async (queryInterface, Sequelize) => {
-    await queryInterface.dropTable('Devices');
+    await queryInterface.dropTable('Feedbacks');
   }
 };
